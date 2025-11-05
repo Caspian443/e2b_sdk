@@ -42,6 +42,11 @@ export interface ConnectionOpts {
    */
   debug?: boolean
   /**
+   * If true forces the use of HTTP instead of HTTPS for API and envd connections.
+   * @default E2B_FORCE_HTTP // environment variable or `false`
+   */
+  forceHttp?: boolean
+  /**
    * Timeout for requests to the API in **milliseconds**.
    *
    * @default 60_000 // 60 seconds
@@ -63,6 +68,7 @@ export interface ConnectionOpts {
  */
 export class ConnectionConfig {
   readonly debug: boolean
+  readonly forceHttp: boolean
   readonly domain: string
   readonly apiUrl: string
   readonly logger?: Logger
@@ -77,6 +83,7 @@ export class ConnectionConfig {
   constructor(opts?: ConnectionOpts) {
     this.apiKey = opts?.apiKey || ConnectionConfig.apiKey
     this.debug = opts?.debug || ConnectionConfig.debug
+    this.forceHttp = opts?.forceHttp || ConnectionConfig.forceHttp
     this.domain = opts?.domain || ConnectionConfig.domain
     this.accessToken = opts?.accessToken || ConnectionConfig.accessToken
     this.requestTimeoutMs = opts?.requestTimeoutMs ?? REQUEST_TIMEOUT_MS
@@ -87,7 +94,9 @@ export class ConnectionConfig {
     this.apiUrl =
       opts?.apiUrl ||
       ConnectionConfig.apiUrl ||
-      (this.debug ? 'http://localhost:3000' : `https://api.${this.domain}`)
+      (this.debug
+        ? 'http://localhost:3000'
+        : `${this.forceHttp ? 'http' : 'https'}://api.${this.domain}`)
   }
 
   private static get domain() {
@@ -100,6 +109,10 @@ export class ConnectionConfig {
 
   private static get debug() {
     return (getEnvVar('E2B_DEBUG') || 'false').toLowerCase() === 'true'
+  }
+
+  private static get forceHttp() {
+    return (getEnvVar('E2B_FORCE_HTTP') || 'false').toLowerCase() === 'true'
   }
 
   private static get apiKey() {

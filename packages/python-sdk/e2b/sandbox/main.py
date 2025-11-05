@@ -46,7 +46,7 @@ class SandboxBase:
         self.__sandbox_domain = sandbox_domain or self.connection_config.domain
         self.__envd_version = envd_version
         self.__envd_access_token = envd_access_token
-        self.__envd_api_url = f"{'http' if self.connection_config.debug else 'https'}://{self.get_host(self.envd_port)}"
+        self.__envd_api_url = f"{'http' if (self.connection_config.debug or self.connection_config.force_http) else 'https'}://{self.get_host(self.envd_port)}"
         self.__mcp_token: Optional[str] = None
 
     @property
@@ -206,4 +206,4 @@ class SandboxBase:
 
         :returns MCP URL for the sandbox.
         """
-        return f"https://{self.get_host(self.mcp_port)}/mcp"
+        return f"https://{self.get_host(self.mcp_port)}"
